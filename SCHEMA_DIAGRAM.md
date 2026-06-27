@@ -1,0 +1,161 @@
+# Schema Diagram
+
+## Entity-Relationship Diagram
+
+```mermaid
+erDiagram
+    PERSON ||--o{ TASK : "assigned_to"
+    PERSON ||--o{ TASK : "about"
+    PERSON ||--o{ MEETING : "attends"
+    PERSON ||--o{ PROJECT : "owns"
+    PERSON ||--o{ PROJECT : "member_of"
+    PERSON ||--o{ OPPORTUNITY : "primary_contact"
+    PERSON }o--|| ORGANIZATION : "works_at"
+    
+    ORGANIZATION ||--o{ OPPORTUNITY : "has"
+    ORGANIZATION ||--o{ NOTE : "linked_to"
+    
+    MEETING ||--o{ TASK : "has"
+    MEETING ||--o{ OPPORTUNITY : "discusses"
+    MEETING ||--o{ PROJECT : "reviews"
+    MEETING ||--o{ NOTE : "has_notes"
+    
+    TASK ||--o{ PROJECT : "belongs_to"
+    TASK ||--o{ OPPORTUNITY : "related_to"
+    TASK ||--o{ NOTE : "has_notes"
+    
+    OPPORTUNITY ||--o{ PROJECT : "drives"
+    OPPORTUNITY ||--o{ NOTE : "has_notes"
+    
+    PROJECT ||--o{ NOTE : "has_notes"
+    
+    NOTE ||--|| PERSON : "linked_to"
+    NOTE ||--|| ORGANIZATION : "linked_to"
+    NOTE ||--|| MEETING : "linked_to"
+    NOTE ||--|| TASK : "linked_to"
+    NOTE ||--|| OPPORTUNITY : "linked_to"
+    NOTE ||--|| PROJECT : "linked_to"
+
+    PERSON {
+        string id PK
+        string name
+        string email
+        string phone
+        string linkedin_url
+        string organization_id FK
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ORGANIZATION {
+        string id PK
+        string name
+        string website
+        string industry
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    MEETING {
+        string id PK
+        string title
+        timestamp start_time
+        timestamp end_time
+        string timezone
+        json attendee_ids
+        string project_id FK
+        string opportunity_id FK
+        string zoom_link
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    TASK {
+        string id PK
+        string title
+        string description
+        string owner_id FK
+        string related_person_id FK
+        string project_id FK
+        string opportunity_id FK
+        string status
+        date due_date
+        int priority
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    OPPORTUNITY {
+        string id PK
+        string title
+        string description
+        string person_id FK
+        string organization_id FK
+        string stage
+        decimal value
+        date expected_close_date
+        string project_id FK
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PROJECT {
+        string id PK
+        string name
+        string description
+        string owner_id FK
+        json team_ids
+        string opportunity_id FK
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    NOTE {
+        string id PK
+        string content
+        json linked_to
+        json tags
+        timestamp created_at
+        timestamp updated_at
+    }
+```
+
+## Relationship Summary
+
+| From | To | Type | Notes |
+|------|-----|------|-------|
+| Person | Organization | many-to-one | Employee works at company |
+| Person | Task | one-to-many | Task assigned to or about a person |
+| Person | Meeting | many-to-many | Attendees via json array |
+| Person | Project | one-to-many | Owner or team member |
+| Person | Opportunity | one-to-many | Primary contact |
+| Organization | Opportunity | one-to-many | Organization has opportunities |
+| Meeting | Task | one-to-many | Tasks created from meetings |
+| Meeting | Opportunity | many-to-many | Meetings discuss opportunities |
+| Meeting | Project | many-to-many | Meetings review projects |
+| Task | Project | many-to-one | Task belongs to project |
+| Task | Opportunity | many-to-one | Task related to opportunity |
+| Opportunity | Project | one-to-many | Opportunity drives project |
+| Note | All nouns | polymorphic | Notes can link to any entity |
+
+## Data Flow Example: Woody Meeting
+
+```
+Person: Woody Zuill
+  ↓ (attends)
+Meeting: "AI Workshop" on Monday 9:00
+  ├─ Attendees: [Woody, Steve, Ben]
+  ├─ Project: "GenAI Day 7"
+  ├─ Opportunity: "Workshop sponsorship"
+  └─ Notes: [Meeting notes, follow-ups]
+    ↓
+Task: "Verify LinkedIn connections"
+  ├─ Owner: Michael
+  ├─ Due: Today
+  └─ Note: "Link Woody, Steve, Ben to LinkedIn"
+```
