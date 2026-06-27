@@ -1,6 +1,6 @@
 # Daylite Replacement — Schema
 
-**See [schema-diagram.md](schema-diagram.md) for visual ER diagram (Typora-compatible mermaid)**
+**See [schema_diagram.md](schema_diagram.md) for visual ER diagram (Typora-compatible mermaid)**
 
 ## Core Nouns
 
